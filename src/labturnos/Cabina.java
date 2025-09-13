@@ -1,19 +1,57 @@
 package labturnos;
 
-public class Cabina {
-    private final int id;
-    private Turno turnoActual;
-    private int atendidosCount = 0;
-    private long lastFinishedAt = 0L;
 
-    public Cabina(int id) { this.id = id; }
+import java.time.Instant;
+
+
+public class Cabina {
+    private final int id; // 1..4
+    private Turno actual; // null si Libre
+    private int atendidos; // contador total
+    private Instant lastFinishedAt; // instante de liberación (null al inicio)
+
+
+    public Cabina(int id) {
+        this.id = id;
+        this.actual = null;
+        this.atendidos = 0;
+        this.lastFinishedAt = null;
+    }
+
 
     public int getId() { return id; }
-    public Turno getTurnoActual() { return turnoActual; }
-    public void setTurnoActual(Turno t) { this.turnoActual = t; }
+    public Turno getActual() { return actual; }
+    public int getAtendidos() { return atendidos; }
+    public Instant getLastFinishedAt() { return lastFinishedAt; }
 
-    public int getAtendidosCount() { return atendidosCount; }
-    public void incAtendidos() { this.atendidosCount++; }
-    public long getLastFinishedAt() { return lastFinishedAt; }
-    public void setLastFinishedAt(long ts) { this.lastFinishedAt = ts; }
+
+    public boolean isLibre() { return actual == null; }
+
+
+    /** Asigna un turno a la cabina (debe estar libre). */
+    public void asignar(Turno t) {
+        if (!isLibre()) throw new IllegalStateException("La cabina " + id + " no está libre");
+        this.actual = t;
+    }
+
+
+    /**
+     * Termina el turno actual, incrementa contador, registra lastFinishedAt y libera la cabina.
+     * Devuelve el turno atendido para moverlo al bucket de atendidos.
+     */
+    public Turno terminar() {
+        if (isLibre()) throw new IllegalStateException("La cabina " + id + " ya está libre");
+        Turno t = this.actual;
+        this.actual = null;
+        this.atendidos++;
+        this.lastFinishedAt = Instant.now();
+        return t;
+    }
+
+
+    @Override
+    public String toString() {
+        String estado = isLibre() ? "Libre" : ("Atendiendo: " + actual.getId());
+        return "Cabina " + id + " — " + estado + " | atendidos=" + atendidos;
+    }
 }
