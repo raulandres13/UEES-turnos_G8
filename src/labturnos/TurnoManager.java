@@ -103,7 +103,7 @@ public class TurnoManager {
 
     // TODO(3): snapshot ordenado para UI de la cola
     public List<Turno> getColaSnapshot() {
-    // PriorityQueue no garantiza iteración ordenada; hacemos copia y ordenamos con el comparador
+        // PriorityQueue no garantiza iteración ordenada; hacemos copia y ordenamos con el comparador
         List<Turno> list = new ArrayList<>(cola);
         list.sort(COLA_COMPARATOR);
         return list;

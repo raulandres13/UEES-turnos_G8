@@ -87,9 +87,16 @@ public class MainFrame extends JFrame {
         btnNuevoBaja.addActionListener(e -> { manager.nuevoTurno(Turno.Prioridad.BAJA); refresh(); });
         btnSiguiente.addActionListener(e -> { manager.siguienteGlobal(); refresh(); });
 
+        // Se ajusta tamaño a los preferredSize ya definidos
+        pack();
+
         // Primera pintura
         refresh();
         setLocationRelativeTo(null);
+
+        // Nombre de ventana y close
+        setTitle("Laboratorio - Sistema de turnos con prioridad");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     private void onTerminar(int cabinaId) {
@@ -97,22 +104,22 @@ public class MainFrame extends JFrame {
             Turno t = manager.terminarCabina(cabinaId);
             atendidosModel.addElement(t.getId());
         } catch (Exception ex) {
-    // No emergentes obligatorios (según consigna); si lo deseas, comenta la siguiente línea
-    // JOptionPane.showMessageDialog(this, ex.getMessage(), "Aviso", JOptionPane.WARNING_MESSAGE);
+            // No emergentes obligatorios (según consigna); si lo deseas, comenta la siguiente línea
+            // JOptionPane.showMessageDialog(this, ex.getMessage(), "Aviso", JOptionPane.WARNING_MESSAGE);
         }
         refresh();
     }
 
 
     private void refresh() {
-    // Cola
+        // Cola
         colaModel.clear();
         for (Turno t : manager.getColaSnapshot()) {
             colaModel.addElement(t.toString());
         }
 
 
-    // Ranking libres
+        // Ranking libres
         rankingModel.clear();
         List<Cabina> libres = manager.getRankingLibresSnapshot();
         for (Cabina c : libres) {
@@ -121,7 +128,7 @@ public class MainFrame extends JFrame {
         }
 
 
-    // Cabinas
+        // Cabinas
         for (Cabina c : manager.getCabinas()) {
             int i = c.getId() - 1;
             if (c.isLibre()) {

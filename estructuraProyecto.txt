@@ -1,34 +1,45 @@
 .
-├── README.md
 ├── README_G8.md
 ├── build
- └── libs
-     └── turnos-final.jar
+│ └── libs
+│     └── turnos-final.jar
 ├── build.bat
 ├── build.sh
 ├── estructuraProyecto.txt
+├── img.png
+├── img_1.png
+├── img_10.png
+├── img_11.png
+├── img_12.png
+├── img_2.png
+├── img_4.png
+├── img_6.png
+├── img_8.png
+├── img_9.png
 ├── out
-├── MANIFEST.MF
-├── labturnos
-  ├── Cabina.class
-  ├── MainFrame.class
-  ├── Turno$Prioridad.class
-  ├── Turno.class
-  └── TurnoManager.class
- └── production
-     └── turnos_G8
-         └── labturnos
-             ├── Cabina.class
-             ├── MainFrame.class
-             ├── Turno$Prioridad.class
-             ├── Turno.class
-             └── TurnoManager.class
+│ ├── MANIFEST.MF
+│ ├── labturnos
+│ │ ├── Cabina.class
+│ │ ├── MainFrame.class
+│ │ ├── Turno$Prioridad.class
+│ │ ├── Turno.class
+│ │ └── TurnoManager.class
+│ └── production
+│     └── turnos_G8
+│         └── labturnos
+│             ├── Cabina.class
+│             ├── MainFrame.class
+│             ├── Turno$Prioridad.class
+│             ├── Turno.class
+│             ├── TurnoManager$1.class
+│             ├── TurnoManager$2.class
+│             └── TurnoManager.class
 ├── src
- └── labturnos
-     ├── Cabina.java
-     ├── MainFrame.java
-     ├── Turno.java
-     └── TurnoManager.java
+│ └── labturnos
+│     ├── Cabina.java
+│     ├── MainFrame.java
+│     ├── Turno.java
+│     └── TurnoManager.java
 └── turnos_G8.iml
 
-
+10 directories, 33 files
