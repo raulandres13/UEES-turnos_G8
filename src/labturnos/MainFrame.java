@@ -88,7 +88,6 @@ public class MainFrame extends JFrame {
         // Se ajusta tamaño a los preferredSize ya definidos
         pack();
 
-        // Primera
         refresh();
         setLocationRelativeTo(null);
 
@@ -102,11 +101,10 @@ public class MainFrame extends JFrame {
             Turno t = manager.terminarCabina(cabinaId);
             atendidosModel.addElement(t.getId());
         } catch (Exception ex) {
-             JOptionPane.showMessageDialog(this, ex.getMessage(), "Aviso", JOptionPane.WARNING_MESSAGE);
+             System.out.println(ex.getMessage());
         }
         refresh();
     }
-
 
     private void refresh() {
         // Cola
