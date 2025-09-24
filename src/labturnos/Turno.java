@@ -9,7 +9,7 @@ public class Turno {
     public enum Prioridad { ALTA, MEDIA, BAJA }
 
 
-    private final String id; // A-### / M-### / B-###
+    private final String id; // A-### / M-### / B-### modelo ID
     private final Prioridad prioridad; // ALTA > MEDIA > BAJA
     private final long seq; // Para mantener FIFO dentro de la misma prioridad
     private final Instant createdAt;

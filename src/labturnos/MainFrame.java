@@ -8,7 +8,6 @@ import java.util.List;
 
 public class MainFrame extends JFrame {
 
-    // Instanciar TurnoManager
     private final TurnoManager manager = new TurnoManager();
     // UI – arriba (control)
     private final JButton btnNuevoAlta = new JButton("Nuevo ALTA");
@@ -18,13 +17,16 @@ public class MainFrame extends JFrame {
     // UI – izquierda (cola)
     private final DefaultListModel<String> colaModel = new DefaultListModel<>();
     private final JList<String> colaList = new JList<>(colaModel);
+
     // UI – centro derecha (ranking cabinas libres)
     private final DefaultListModel<String> rankingModel = new DefaultListModel<>();
     private final JList<String> rankingList = new JList<>(rankingModel);
+
     // UI – derecha (cabinas 2x2)
     private final JButton[] btnTerminar = new JButton[4];
     private final JLabel[] lblCabina = new JLabel[4];
-    // UI – abajo (atendidos)
+
+    // UI – abajo (bucket atendidos)
     private final DefaultListModel<String> atendidosModel = new DefaultListModel<>();
     private final JList<String> atendidosList = new JList<>(atendidosModel);
 
@@ -72,7 +74,7 @@ public class MainFrame extends JFrame {
         centerRight.add(cabinasGrid, BorderLayout.CENTER);
         add(centerRight, BorderLayout.CENTER);
 
-        // Panel inferior lista atendidos
+        // Panel inferior (bucket)
         JPanel bottom = new JPanel(new BorderLayout());
         bottom.add(new JLabel("Atendidos:"), BorderLayout.NORTH);
         bottom.add(new JScrollPane(atendidosList), BorderLayout.CENTER);
@@ -88,12 +90,12 @@ public class MainFrame extends JFrame {
         // Se ajusta tamaño a los preferredSize ya definidos
         pack();
 
-        // Primera
+        // Primera pintura
         refresh();
         setLocationRelativeTo(null);
 
         // Nombre de ventana y close
-        setTitle("Grupo 8 - Laboratorio - Sistema de turnos con prioridad");
+        setTitle("Laboratorio - Sistema de turnos con prioridad");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
@@ -159,11 +161,7 @@ public class MainFrame extends JFrame {
 
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            Banner.showBanner(() -> {
-                new MainFrame().setVisible(true);
-            });
-        });
+        SwingUtilities.invokeLater(() -> new MainFrame().setVisible(true));
     }
 
 }
