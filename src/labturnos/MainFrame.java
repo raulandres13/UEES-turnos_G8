@@ -8,6 +8,7 @@ import java.util.List;
 
 public class MainFrame extends JFrame {
 
+    // Instanciar TurnoManager
     private final TurnoManager manager = new TurnoManager();
     // UI – arriba (control)
     private final JButton btnNuevoAlta = new JButton("Nuevo ALTA");
@@ -17,16 +18,13 @@ public class MainFrame extends JFrame {
     // UI – izquierda (cola)
     private final DefaultListModel<String> colaModel = new DefaultListModel<>();
     private final JList<String> colaList = new JList<>(colaModel);
-
-    // UI – centro derecha (ranking cabinas libres)
+    // UI – centro derecha (cabinas libres)
     private final DefaultListModel<String> rankingModel = new DefaultListModel<>();
     private final JList<String> rankingList = new JList<>(rankingModel);
-
     // UI – derecha (cabinas 2x2)
     private final JButton[] btnTerminar = new JButton[4];
     private final JLabel[] lblCabina = new JLabel[4];
-
-    // UI – abajo (bucket atendidos)
+    // UI – abajo (atendidos)
     private final DefaultListModel<String> atendidosModel = new DefaultListModel<>();
     private final JList<String> atendidosList = new JList<>(atendidosModel);
 
@@ -49,7 +47,7 @@ public class MainFrame extends JFrame {
         add(left, BorderLayout.WEST);
         left.setPreferredSize(new Dimension(280, 400));
 
-        // Panel centro-derecha (ranking)
+        // Panel centro-derecha
         JPanel centerRight = new JPanel(new BorderLayout(10, 10));
         JPanel rankingPane = new JPanel(new BorderLayout());
         rankingPane.add(new JLabel("Ranking cabinas libres:"), BorderLayout.NORTH);
@@ -74,7 +72,7 @@ public class MainFrame extends JFrame {
         centerRight.add(cabinasGrid, BorderLayout.CENTER);
         add(centerRight, BorderLayout.CENTER);
 
-        // Panel inferior (bucket)
+        // Panel inferior lista atendidos
         JPanel bottom = new JPanel(new BorderLayout());
         bottom.add(new JLabel("Atendidos:"), BorderLayout.NORTH);
         bottom.add(new JScrollPane(atendidosList), BorderLayout.CENTER);
@@ -90,12 +88,11 @@ public class MainFrame extends JFrame {
         // Se ajusta tamaño a los preferredSize ya definidos
         pack();
 
-        // Primera pintura
         refresh();
         setLocationRelativeTo(null);
 
         // Nombre de ventana y close
-        setTitle("Laboratorio - Sistema de turnos con prioridad");
+        setTitle("Grupo 8 - Laboratorio - Sistema de turnos con prioridad");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
@@ -104,12 +101,10 @@ public class MainFrame extends JFrame {
             Turno t = manager.terminarCabina(cabinaId);
             atendidosModel.addElement(t.getId());
         } catch (Exception ex) {
-            // No emergentes obligatorios (según consigna); si lo deseas, comenta la siguiente línea
-            // JOptionPane.showMessageDialog(this, ex.getMessage(), "Aviso", JOptionPane.WARNING_MESSAGE);
+             System.out.println(ex.getMessage());
         }
         refresh();
     }
-
 
     private void refresh() {
         // Cola
@@ -118,15 +113,13 @@ public class MainFrame extends JFrame {
             colaModel.addElement(t.toString());
         }
 
-
-        // Ranking libres
+        //  Libres
         rankingModel.clear();
         List<Cabina> libres = manager.getRankingLibresSnapshot();
         for (Cabina c : libres) {
             String last = (c.getLastFinishedAt() == null) ? "—" : c.getLastFinishedAt().toString();
             rankingModel.addElement("Cabina " + c.getId() + " | atendidos=" + c.getAtendidos() + " | last=" + last);
         }
-
 
         // Cabinas
         for (Cabina c : manager.getCabinas()) {
@@ -140,13 +133,11 @@ public class MainFrame extends JFrame {
             }
         }
 
-
         // Siguiente habilitado solo si hay turnos y hay alguna cabina libre
         boolean habilitado = manager.hayTurnosEnCola() && manager.hayCabinaLibre();
         btnSiguiente.setEnabled(habilitado);
         estilizarSiguiente(habilitado);
     }
-
 
     // TODO(UI): colores y estado del botón Siguiente (verde cuando habilitado; gris apagado cuando no)
     private void estilizarSiguiente(boolean habilitado) {
@@ -161,7 +152,11 @@ public class MainFrame extends JFrame {
 
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new MainFrame().setVisible(true));
+        SwingUtilities.invokeLater(() -> {
+            Banner.showBanner(() -> {
+                new MainFrame().setVisible(true);
+            });
+        });
     }
 
 }
