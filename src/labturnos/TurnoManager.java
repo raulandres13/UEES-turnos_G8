@@ -5,9 +5,48 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Orquesta la cola de turnos (PriorityQueue), las 4 cabinas, el bucket de atendidos y el ranking de cabinas libres.
+ * Orquesta la cola de turnos (PriorityQueue), las 4 cabinas, a la list de atendidos y el ranking de cabinas libres.
  */
 public class TurnoManager {
+
+    // Cabinas
+    private final List<Cabina> cabinas = new ArrayList<>();
+    // Lista de atendidos
+    private final List<Turno> atendidos = new ArrayList<>();
+    // Ranking de cabinas libres (TreeSet) — TODO(6)
+    private final TreeSet<Cabina> rankingLibres = new TreeSet<>(new Comparator<Cabina>() {
+        @Override
+        public int compare(Cabina c1, Cabina c2) {
+            // (1) menor cantidad de atendidos
+            if (c1.getAtendidos() != c2.getAtendidos())
+                return Integer.compare(c1.getAtendidos(), c2.getAtendidos());
+            // (2) la que liberó ANTES su última asignación (lastFinishedAt más antiguo)
+            // null (nunca liberó) se considera "más nuevo" que cualquier fecha, así no gana sobre quien sí descansó
+            if (!Objects.equals(c1.getLastFinishedAt(), c2.getLastFinishedAt())) {
+                if (c1.getLastFinishedAt() == null) return 1; // c1 peor.
+                if (c2.getLastFinishedAt() == null) return -1; // c1 mejor.
+                int cmp = c1.getLastFinishedAt().compareTo(c2.getLastFinishedAt());
+                if (cmp != 0) return cmp; // más antiguo primero
+            }
+            // (3) menor id de cabina
+            return Integer.compare(c1.getId(), c2.getId());
+        }
+    });
+    // Cola de prioridad de turnos
+    private final PriorityQueue<Turno> cola = new PriorityQueue<>(COLA_COMPARATOR);
+
+    public TurnoManager() {
+        // Crear 4 cabinas y agregarlas al ranking de libres
+        for (int i = 1; i <= 4; i++) {
+            Cabina c = new Cabina(i);
+            cabinas.add(c);
+            rankingLibres.add(c);
+        }
+        // Estado inicial: 2 turnos en espera
+        nuevoTurno(Turno.Prioridad.ALTA);
+        nuevoTurno(Turno.Prioridad.MEDIA);
+    }
+
     // TODO(1): comparador prioridad + FIFO (ALTA > MEDIA > BAJA y, en empate, menor seq primero)
     private static final Comparator<Turno> COLA_COMPARATOR = (a, b) -> {
         int pa = prioridadScore(a.getPrioridad());
@@ -25,55 +64,9 @@ public class TurnoManager {
         return 0;
     }
 
-    // Cola de prioridad de turnos
-    private final PriorityQueue<Turno> cola = new PriorityQueue<>(COLA_COMPARATOR);
-
-
-    // Generación de IDs secuenciales por prioridad
+    // Generación de IDs secuencias por prioridad
     private int nextA = 1, nextM = 1, nextB = 1;
     private final AtomicLong seqGen = new AtomicLong(1); // para FIFO
-
-
-    // Cabinas
-    private final List<Cabina> cabinas = new ArrayList<>();
-
-
-    // Ranking de cabinas libres (TreeSet) — TODO(6)
-    private final TreeSet<Cabina> rankingLibres = new TreeSet<>(new Comparator<Cabina>() {
-        @Override
-        public int compare(Cabina c1, Cabina c2) {
-            // (1) menor cantidad de atendidos
-            if (c1.getAtendidos() != c2.getAtendidos())
-                return Integer.compare(c1.getAtendidos(), c2.getAtendidos());
-            // (2) la que liberó ANTES su último ticket (lastFinishedAt más antiguo)
-            // null (nunca liberó) se considera "más nuevo" que cualquier fecha, así no gana sobre quien sí descansó
-            if (!Objects.equals(c1.getLastFinishedAt(), c2.getLastFinishedAt())) {
-                if (c1.getLastFinishedAt() == null) return 1; // c1 peor pos.
-                if (c2.getLastFinishedAt() == null) return -1; // c1 mejor pos.
-                int cmp = c1.getLastFinishedAt().compareTo(c2.getLastFinishedAt());
-                if (cmp != 0) return cmp; // más antiguo primero
-            }
-            // (3) menor id de cabina
-            return Integer.compare(c1.getId(), c2.getId());
-        }
-    });
-
-    // Bucket de atendidos
-    private final List<Turno> atendidos = new ArrayList<>();
-
-
-    public TurnoManager() {
-        // Crear 4 cabinas y agregarlas al ranking de libres
-        for (int i = 1; i <= 4; i++) {
-            Cabina c = new Cabina(i);
-            cabinas.add(c);
-            rankingLibres.add(c);
-        }
-        // Estado inicial: 2 turnos en espera
-        nuevoTurno(Turno.Prioridad.ALTA);
-        nuevoTurno(Turno.Prioridad.MEDIA);
-    }
-
 
     // TODO(2): generación de IDs A-### / M-### / B-###
     public Turno nuevoTurno(Turno.Prioridad p) {
@@ -90,16 +83,9 @@ public class TurnoManager {
     }
 
     public boolean hayTurnosEnCola() { return !cola.isEmpty(); }
-
-
     public boolean hayCabinaLibre() { return rankingLibres.stream().anyMatch(Cabina::isLibre); }
-
-
     public List<Turno> getAtendidosSnapshot() { return Collections.unmodifiableList(new ArrayList<>(atendidos)); }
-
-
     public List<Cabina> getCabinas() { return Collections.unmodifiableList(cabinas); }
-
 
     // TODO(3): snapshot ordenado para UI de la cola
     public List<Turno> getColaSnapshot() {
@@ -109,39 +95,8 @@ public class TurnoManager {
         return list;
     }
 
-    // TODO(6): snapshot de cabinas libres ordenadas
-    public List<Cabina> getRankingLibresSnapshot() {
-        List<Cabina> libres = new ArrayList<>();
-        for (Cabina c : rankingLibres) {
-            if (c.isLibre()) libres.add(c);
-        }
-        return libres;
-    }
-
-
     /**
-     * TODO(5): Siguiente global → asigna el mejor turno a la mejor cabina libre según ranking.
-     * Devuelve true si se asignó; false si no había turno o no había cabina libre.
-     */
-    public boolean siguienteGlobal() {
-        if (cola.isEmpty()) return false;
-        // tomar la mejor cabina libre
-        Cabina destino = null;
-        for (Cabina c : rankingLibres) {
-            if (c.isLibre()) { destino = c; break; }
-        }
-        if (destino == null) return false;
-
-        // retiramos la cabina del ranking temporalmente (para evitar inconsistencias al asignar)
-        rankingLibres.remove(destino);
-        Turno t = cola.poll();
-        destino.asignar(t);
-        // Al estar ocupada, NO se reingresa al ranking; volverá cuando libere
-        return true;
-    }
-
-    /**
-     * TODO(4): termina el turno de cierta cabina → mueve a bucket, incrementa contadores, registra lastFinishedAt y libera.
+     * TODO(4): termina el turno de cierta cabina → mueve a la lista del final, incrementa contadores, registra lastFinishedAt y libera.
      * Luego reingresa al ranking de libres.
      */
     public Turno terminarCabina(int cabinaId) {
@@ -154,4 +109,36 @@ public class TurnoManager {
         rankingLibres.add(c);
         return t;
     }
+
+    /**
+     * TODO(5): Siguiente global asigna el mejor turno a la mejor cabina libre según ranking.
+     * Devuelve true si se asignó; false si no había turno o no había cabina libre.
+     */
+    public boolean siguienteGlobal() {
+        if (cola.isEmpty()) return false;
+        // tomar la mejor cabina libre
+        Cabina destino = null;
+        for (Cabina c : rankingLibres) {
+            if (c.isLibre()) { destino = c; break; }
+        }
+        if (destino == null) return false;
+
+        // retiro cabina temporalmente (para evitar error al asignar)
+        rankingLibres.remove(destino);
+        Turno t = cola.poll();
+        destino.asignar(t);
+        // Al estar ocupada, NO se reingresar; volver cuando se libere
+        return true;
+    }
+
+    // TODO(6): snapshot de cabinas libres ordenadas
+    public List<Cabina> getRankingLibresSnapshot() {
+        List<Cabina> libres = new ArrayList<>();
+        for (Cabina c : rankingLibres) {
+            if (c.isLibre()) libres.add(c);
+        }
+        return libres;
+    }
+
+
 }
