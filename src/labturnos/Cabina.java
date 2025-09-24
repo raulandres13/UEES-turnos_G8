@@ -23,12 +23,10 @@ public class Cabina {
     public Turno getActual() { return actual; }
     public int getAtendidos() { return atendidos; }
     public Instant getLastFinishedAt() { return lastFinishedAt; }
-
-
     public boolean isLibre() { return actual == null; }
 
 
-    /** Asigna un turno a la cabina (debe estar libre). */
+    /** Asigna un turno a la cabina (* debe estar libre). */
     public void asignar(Turno t) {
         if (!isLibre()) throw new IllegalStateException("La cabina " + id + " no está libre");
         this.actual = t;
@@ -36,8 +34,8 @@ public class Cabina {
 
 
     /**
-     * Termina el turno actual, incrementa contador, registra lastFinishedAt y libera la cabina.
-     * Devuelve el turno atendido para moverlo al bucket de atendidos.
+     * Termina el turno actual, incrementar el contador, registrar en lastFinishedAt y libera la cabina.
+     * Devuelve el turno atendido para moverlo a la lista de atendidos.
      */
     public Turno terminar() {
         if (isLibre()) throw new IllegalStateException("La cabina " + id + " ya está libre");
